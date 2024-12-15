@@ -8,29 +8,62 @@ namespace project_promise
 {
     internal class Order
     {
-        private Dictionary<string, OrderItem> _items = new Dictionary<string, OrderItem>();
-    
-        public void AddProduct(Product product, int quantity)
-        {
-            var existingItem = _items.TryAdd(product.Name, new OrderItem(product, quantity));
-            if (!existingItem)
-            {
-                if (_items.TryGetValue(product.Name, out var orderItem))
-                {
-                    orderItem.Quantity += quantity;
-                }
-            }
-        }
+        private Dictionary<string, OrderItem> _orderItems = new Dictionary<string, OrderItem>();
 
-        public void RemoveProduct(Product product, int quantity)
+        private Dictionary<string, Product> _products = new Dictionary<string, Product>
         {
-            if (_items.ContainsKey(product.Name))
-            { 
-                _items.Remove(product.Name);
+            { "Laptop", new Product("Laptop", 2500m) },
+            { "Klawiatura", new Product("Klawiatura", 120m) },
+            { "Mysz", new Product("Mysz", 90m) },
+            { "Monitor", new Product("Monitor", 1000m) },
+            { "Kaczka debuggująca", new Product("Kaczka debuggująca", 66m) }
+        };
+
+
+        public void AddProduct(string productName, int quantity)
+        {
+            if (_orderItems.TryGetValue(productName, out var orderItem))
+            {
+                orderItem.Quantity += quantity;
             }
             else
             {
-                Console.WriteLine("Dany produkt nie znajduje się w zamówieniu");
+                _orderItems[productName] = new OrderItem(_products[productName], quantity);
+            }
+        }
+
+
+        public void RemoveProduct(string productName, int quantity)
+        {
+            if (_orderItems.TryGetValue(productName, out var orderItem))
+            {
+                if (quantity >= orderItem.Quantity)
+                {
+                    _orderItems.Remove(productName);
+                    Console.WriteLine($"Produkt \"{productName}\" został całkowicie usunięty z zamówienia.");
+                }
+                else
+                {
+                    orderItem.Quantity -= quantity;
+                    Console.WriteLine($"Zamówienie dla produktu \"{productName}\" zostało zmniejszone o {quantity}. Pozostało {orderItem.Quantity}.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Dany produkt nie znajduje się w zamówieniu.");
+            }
+        }
+
+
+        public bool CheckIfProductExists(string productName)
+        {
+            if (_products.ContainsKey(productName))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
     }
