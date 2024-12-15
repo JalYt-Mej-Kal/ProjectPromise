@@ -1,5 +1,6 @@
 ﻿using project_promise;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Cryptography.X509Certificates;
 using System.Xml.Serialization;
 
@@ -73,11 +74,47 @@ class Program
 					}
 				case "3":
 					{
-						foreach (var product in order.orderItems)
+						decimal totalOrderDiscount = 0;
+
+                        var sortedProducts = order.orderItems.Values
+                                    .SelectMany(order => Enumerable.Repeat(order.Product, order.Quantity))
+                                    .OrderBy(product => product.Price)
+                                    .ToList();
+
+                        decimal discount = 0;
+
+                        if (sortedProducts.Count >= 2)
+                        {
+                            var secondCheapest = sortedProducts[0];
+                            discount = secondCheapest.Price * 0.10m;
+                        }
+
+                        if (sortedProducts.Count >= 3)
+                        {
+                            var thirdCheapest = sortedProducts[0];
+                            decimal alternativeDiscount = thirdCheapest.Price * 0.20m;
+                            if (alternativeDiscount > discount)
+                            {
+                                discount = alternativeDiscount;
+                            }
+                        }
+
+                        decimal totalPrice = sortedProducts.Sum(product => product.Price);
+                        totalPrice -= discount;
+
+                        foreach (var product in order.orderItems)
 						{
-							Console.WriteLine($"Produkt: {product.Value.Product.Name}, ilość: {product.Value.Quantity}");
+							Console.WriteLine($"Produkt: {product.Value.Product.Name}, ilość: {product.Value.Quantity}, cena: {product.Value.TotalPrice()}");
 						}
-						break;
+
+						if (totalPrice > 5000)
+						{
+							totalOrderDiscount = 0.05m * totalPrice;
+                            totalPrice = totalPrice - totalOrderDiscount;
+						}
+						Console.WriteLine($"Suma: {Math.Round(totalPrice, 2)}");
+                        Console.WriteLine($"Rabat wynosi: {Math.Round(totalOrderDiscount + discount, 2)}");
+                        break;
 					}
 				case "4":
 					{
