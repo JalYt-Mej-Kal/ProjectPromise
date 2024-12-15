@@ -1,9 +1,44 @@
 ﻿using project_promise;
 using System;
+using System.Security.Cryptography.X509Certificates;
 using System.Xml.Serialization;
 
 class Program
 {
+    private static string ProductName { get; set; }
+    private static int ProductQty {  get; set; }
+	public static void ProductValidation(Order order)
+	{
+        bool correctProduct = false;
+        bool correctProductQty = false;
+        do
+        {
+            Console.WriteLine("Podaj nazwę produktu: ");
+            ProductName = Console.ReadLine();
+            correctProduct = order.CheckIfProductExists(ProductName);
+            if (!correctProduct)
+            {
+                Console.WriteLine("Nazwa produktu jest nieprawidłowa, bądź produktu nie ma w sklepie");
+            }
+        }
+        while (!correctProduct);
+
+        do
+        {
+            Console.WriteLine("Podaj liczbę produktów: ");
+            var productQtyString = Console.ReadLine();
+            correctProductQty = int.TryParse(productQtyString, out var productQty) && productQty > 0;
+            if (!correctProductQty)
+            {
+                Console.WriteLine("Podano nieprawiłową liczbę");
+            }
+            else
+            {
+                ProductQty = productQty;
+            }
+        }
+        while (!correctProductQty);
+    }
 	public static void Main(string[] args)
 	{
 		bool exit = false;
@@ -22,72 +57,26 @@ class Program
 			{
 				case "1":
 					{
-						string productName;
-						bool correctProduct = false;
-						var productQty = 0;
-						bool correctProductQty = false;
-						do
-						{
-							Console.WriteLine("Podaj nazwę dodawanego produktu: ");
-							productName = Console.ReadLine();
-							correctProduct = order.CheckIfProductExists(productName);
-							if (!correctProduct)
-							{
-								Console.WriteLine("Nazwa produktu jest nieprawidłowa, bądź produktu nie ma w sklepie");
-							}
-						}
-						while (!correctProduct);
-
-						do
-						{
-							Console.WriteLine("Podaj liczbę dodawanych produktów: ");
-							var productQtyString = Console.ReadLine();
-							correctProductQty = int.TryParse(productQtyString, out productQty) && productQty > 0;
-							if (!correctProductQty)
-							{
-								Console.WriteLine("Podano nieprawiłową liczbę");
-							}
-						}
-						while (!correctProductQty);
-
-						order.AddProduct(productName, productQty);
+                        ProductValidation(order);
+						
+						order.AddProduct(ProductName, ProductQty);
 
 						break;
 					}
 				case "2":
 					{
-                        string productName;
-                        bool correctProduct = false;
-                        var productQty = 0;
-                        bool correctProductQty = false;
-                        do
-                        {
-                            Console.WriteLine("Podaj nazwę usuwanego produktu: ");
-                            productName = Console.ReadLine();
-                            correctProduct = order.CheckIfProductExists(productName);
-                            if (!correctProduct)
-                            {
-                                Console.WriteLine("Nazwa produktu jest nieprawidłowa, bądź produktu nie ma w zamówieniu");
-                            }
-                        }
-                        while (!correctProduct);
+                        ProductValidation(order);
 
-                        do
-                        {
-                            Console.WriteLine("Podaj liczbę usuwanych produktów: ");
-                            var productQtyString = Console.ReadLine();
-                            correctProductQty = int.TryParse(productQtyString, out productQty) && productQty > 0;
-                            if (!correctProductQty)
-                            {
-                                Console.WriteLine("Podano nieprawiłową liczbę");
-                            }
-                        }
-                        while (!correctProductQty);
+                        order.RemoveProduct(ProductName, ProductQty);
 
                         break;
 					}
 				case "3":
 					{
+						foreach (var product in order.orderItems)
+						{
+							Console.WriteLine($"Produkt: {product.Value.Product.Name}, ilość: {product.Value.Quantity}");
+						}
 						break;
 					}
 				case "4":
@@ -102,6 +91,5 @@ class Program
 					}
 			}
 		}
-		Console.ReadLine();
 	}
 }

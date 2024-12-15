@@ -8,7 +8,7 @@ namespace project_promise
 {
     internal class Order
     {
-        private Dictionary<string, OrderItem> _orderItems = new Dictionary<string, OrderItem>();
+        public Dictionary<string, OrderItem> orderItems = new Dictionary<string, OrderItem>();
 
         private Dictionary<string, Product> _products = new Dictionary<string, Product>
         {
@@ -22,24 +22,26 @@ namespace project_promise
 
         public void AddProduct(string productName, int quantity)
         {
-            if (_orderItems.TryGetValue(productName, out var orderItem))
+            if (orderItems.TryGetValue(productName, out var orderItem))
             {
                 orderItem.Quantity += quantity;
+                Console.WriteLine($"Zamówienie dla produktu \"{productName}\" zostało zwiększone o {quantity}. Pozostało {orderItem.Quantity}.");
             }
             else
             {
-                _orderItems[productName] = new OrderItem(_products[productName], quantity);
+                orderItems[productName] = new OrderItem(_products[productName], quantity);
+                Console.WriteLine($"Dodano produkt \"{productName}\" do zamówienia. Ilość: {quantity}.");
             }
         }
 
 
         public void RemoveProduct(string productName, int quantity)
         {
-            if (_orderItems.TryGetValue(productName, out var orderItem))
+            if (orderItems.TryGetValue(productName, out var orderItem))
             {
                 if (quantity >= orderItem.Quantity)
                 {
-                    _orderItems.Remove(productName);
+                    orderItems.Remove(productName);
                     Console.WriteLine($"Produkt \"{productName}\" został całkowicie usunięty z zamówienia.");
                 }
                 else
