@@ -1,6 +1,4 @@
-﻿
-
-namespace project_promise
+﻿namespace ProjectPromise
 {
     internal class Product
     {
